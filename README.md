@@ -52,7 +52,7 @@ simulation → feasibility validation → MILP optimization → Arduino-based ex
 
 The physical and electronic architecture of the prototype, which uses an ultrasonic and temperature sensor, water pumps, and a joystick, is shown in the following circuit diagram:
 
-![System Flow Diagram](images/diagrama_flujo.png)
+![System Flow Diagram](AquaSmart_CODE/images/diagrama_flujo.png)
 
 This circuit represents the actual hardware implementation used to execute the rationing calendar computed by the optimization model.
 AquaSmart_CODE/images/circuito.png
