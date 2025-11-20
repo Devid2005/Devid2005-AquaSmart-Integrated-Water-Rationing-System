@@ -109,7 +109,9 @@ Open index.html in your browser to visualize levels, states and events.
 Case Study: Bogotá 2025 Water Crisis
 
 AquaSmart replicates real consumption patterns and reservoir behavior observed during Bogotá’s 2025 drought. Results show:
+
 AquaSmart_CODE/images/results.png
+
 • A 25–30% reduction in total water consumption compared to no-rationing scenarios
 • Progressive recovery of reservoir levels
 • Enforcement of fairness constraints (no zone experiences more than two consecutive rationing days)
