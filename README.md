@@ -1,4 +1,4 @@
-# Devid2005-AquaSmart-Integrated-Water-Rationing-System
+# AquaSmart-Integrated-Water-Rationing-System
 AquaSmart is an integrated platform for data-driven water-rationing that combines Python-based simulation, MILP optimization in IBM ILOG CPLEX, Arduino mechatronic control, and real-time web visualization. The system was developed as a technical solution for urban water scarcity scenarios, using Bogotá’s 2025 drought as a real reference case.
 
 Features
