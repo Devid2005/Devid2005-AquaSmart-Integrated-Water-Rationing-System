@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AquaSmart - Control Sincronizado</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0f172a;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 30px;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 30px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    button {
+      background-color: #2563eb;
+      color: #fff;
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+    }
+
+    button:hover { background-color: #1e40af; }
+    button:active { transform: scale(0.98); }
+    button:disabled {
+      background-color: #475569;
+      cursor: not-allowed;
+    }
+
+    /* === CONTENEDOR SCROLL === */
+    .tabla-contenedor {
+      width: 95%;
+      max-width: 95vw;
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      background-color: #1e293b;
+      scrollbar-color: #2563eb #0f172a;
+      scrollbar-width: thin;
+      margin: 20px auto;
+      white-space: nowrap;
+    }
+
+    table {
+      border-collapse: collapse;
+      min-width: 800px;
+      width: max-content;
+      background-color: #1e293b;
+      transition: opacity 0.5s ease;
+    }
+
+    th, td {
+      border: 1px solid #334155;
+      padding: 10px 15px;
+      text-align: center;
+      white-space: nowrap;
+      transition: background 0.3s ease;
+    }
+
+    th {
+      background-color: #0f172a;
+      font-weight: bold;
+    }
+
+    .zona {
+      background-color: #1e293b;
+      font-weight: bold;
+      position: sticky;
+      left: 0;
+      z-index: 3;
+    }
+
+    .ok { color: #10b981; }      /* Verde */
+    .fail { color: #ef4444; }    /* Rojo */
+    .active-cell {
+      background-color: #2563eb !important;
+      color: #fff !important;
+      box-shadow: inset 0 0 8px #3b82f6;
+      font-weight: bold;
+    }
+    .done-cell {
+      background-color: #15803d !important;
+      color: #fff !important;
+      transition: background-color 0.5s ease;
+    }
+
+    /* === CONSOLA === */
+    #log {
+      background: #000;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      text-align: left;
+      line-height: 1.5em;
+      max-height: 400px;
+      overflow-y: auto;
+      margin: 25px auto;
+      width: 90%;
+      box-shadow: inset 0 0 10px #000;
+    }
+
+    .arduino { color: #facc15; }   /* Amarillo */
+    .python { color: #22c55e; }    /* Verde claro */
+    .alert-text { color: #ef4444; } /* Rojo */
+    .confirm { color: #38bdf8; }   /* Azul claro */
+
+    footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>PROGRAMACIÓN Y CONTROL AQUASMART</h1>
+
+  <div>
+    <button id="btnActualizar">🔄 Actualizar datos</button>
+    <button id="btnIniciar">🚀 Iniciar racionamiento</button>
+  </div>
+
+  <div class="tabla-contenedor">
+    <table id="tabla-riego"></table>
+  </div>
+
+  <div id="log"><em>Esperando ejecución...</em></div>
+
+  <footer>Proyecto AquaSmart — Universidad del Rosario, 2025</footer>
+
+  <script>
+    const tabla = document.getElementById("tabla-riego");
+    const log = document.getElementById("log");
+    const btnIniciar = document.getElementById("btnIniciar");
+    const btnActualizar = document.getElementById("btnActualizar");
+    let diaActualHeader = null; // encabezado resaltado actual
+
+    // === Cargar tabla desde data.json ===
+    async function cargarTabla() {
+      try {
+        const res = await fetch("data.json?_=" + Date.now());
+        const data = await res.json();
+        const { racionamiento, num_dias } = data;
+        const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+        let header = "<tr><th>ZONA / DÍA</th>";
+        for (let i = 0; i < num_dias; i++) {
+          header += `<th id="dia-${i + 1}">
+            ${diasSemana[i % 7]}<br><small style="color:#93c5fd;">Día ${i + 1}</small>
+          </th>`;
+        }
+        header += "</tr>";
+        tabla.innerHTML = header;
+
+        for (const zona in racionamiento) {
+          let fila = `<tr id="zona-${zona}"><td class="zona">ZONA ${zona}</td>`;
+          for (let d = 0; d < num_dias; d++) {
+            const idCelda = `c-${zona}-${d + 1}`;
+            const fail = racionamiento[zona].includes(d + 1);
+            fila += `<td id="${idCelda}" class="${fail ? "fail" : "ok"}">${
+              fail ? "<span style='color:#ef4444;'>Racionamiento</span>" :
+                     "<span style='color:#10b981;'>Disponible</span>"
+            }</td>`;
+          }
+          fila += "</tr>";
+          tabla.innerHTML += fila;
+        }
+
+        log.innerHTML += "<br><span class='confirm'>✅ Datos actualizados correctamente.</span>";
+      } catch (err) {
+        log.innerHTML += "<br><span class='alert-text'>❌ Error al cargar data.json.</span>";
+      }
+    }
+
+    cargarTabla();
+
+    function limpiarEncabezados() {
+      document.querySelectorAll("th.active-cell, th.ok").forEach(th => th.classList.remove("active-cell","ok"));
+    }
+
+    function limpiarActivos() {
+      document.querySelectorAll("td.active-cell").forEach(el => el.classList.remove("active-cell"));
+    }
+
+    // === Marcar celda y encabezado ===
+    function marcar(zona, dia, estado) {
+      limpiarActivos();
+      const celda = document.getElementById(`c-${zona}-${dia}`);
+      const th = document.getElementById(`dia-${dia}`);
+      if (!celda || !th) return;
+
+      celda.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+
+      if (estado === "en_progreso") {
+        celda.classList.add("active-cell");
+        limpiarEncabezados();
+        th.classList.add("active-cell");
+        diaActualHeader = th;
+      } else if (estado === "completado") {
+        celda.classList.add("done-cell");
+        if (diaActualHeader) diaActualHeader.classList.remove("active-cell");
+        th.classList.add("done-cell");
+      } else if (estado === "critico") {
+        celda.classList.add("alert-text");
+      }
+    }
+
+    // === INICIAR EJECUCIÓN ===
+    btnIniciar.addEventListener("click", () => {
+      btnIniciar.disabled = true;
+      btnIniciar.textContent = "⏳ Ejecutando...";
+      log.innerHTML = "<b>⏳ Iniciando racionamiento...</b><br>";
+
+      const eventSource = new EventSource("http://localhost:5001/run");
+
+      eventSource.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+
+          if (data.type === "log") {
+            let formatted = data.message
+              .replace(/\[ARDUINO\]/g, '<span class="arduino">[ARDUINO]</span>')
+              .replace(/\[PYTHON\]/g, '<span class="python">[PYTHON]</span>')
+              .replace(/RACIONAMIENTO/g, '<span class="alert-text">RACIONAMIENTO</span>')
+              .replace(/Confirmado/g, '<span class="confirm">Confirmado</span>')
+              .replace(/COMPLETADO/g, '<span class="confirm">COMPLETADO</span>')
+              .replace(/ERROR|FALLO/g, '<span class="alert-text">$&</span>');
+            log.innerHTML += formatted + "<br>";
+            log.scrollTop = log.scrollHeight;
+
+          } else if (data.type === "evento") {
+            marcar(data.zona ?? 0, data.dia, data.estado);
+
+          } else if (data.type === "fin") {
+            log.innerHTML += "<br><b class='confirm'>✅ Racionamiento finalizado.</b>";
+            eventSource.close();
+            btnIniciar.disabled = false;
+            btnIniciar.textContent = "🚀 Iniciar racionamiento";
+            limpiarActivos();
+            limpiarEncabezados();
+          }
+        } catch (err) {
+          console.error("Error en evento:", err);
+        }
+      };
+
+      eventSource.onerror = () => {
+        log.innerHTML += "<br><span class='alert-text'>❌ Error: servidor no disponible.</span>";
+        eventSource.close();
+        btnIniciar.disabled = false;
+        btnIniciar.textContent = "🚀 Iniciar racionamiento";
+      };
+    });
+
+    // === ACTUALIZAR DATOS ===
+    btnActualizar.addEventListener("click", () => {
+      btnActualizar.textContent = "⏳ Actualizando...";
+      cargarTabla().then(() => {
+        setTimeout(() => btnActualizar.textContent = "🔄 Actualizar datos", 700);
+      });
+    });
+  </script>
+</body>
+</html>
