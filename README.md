@@ -5,57 +5,76 @@ Features
 1. Simulation Module (Python)
 
 • Generates multi-zone water consumption scenarios
+
 • Incorporates temperature and sector-based demand patterns
+
 • Produces structured parameter files for the optimization stage
 
 2. MILP Optimization (CPLEX)
 
 • Mixed-Integer Linear Programming model for equitable rationing
+
 • Computes optimal supply/cut schedules per zone
+
 • Works with complete or truncated simulation inputs
 
 3. Arduino-Based Physical Prototype
 
 • Real-time control of pumps, solenoid valves, ultrasonic sensors and temperature sensors
+
 • Joystick-based manual day advancement and overrides
+
 • Validates physical feasibility of optimized distribution plans
 
 4. Python–Arduino Communication
 
 • Serial communication for synchronized execution
+
 • Continuous logging of readings and operational events
+
 • Ensures physical execution matches optimized decisions
 
 5. Real-Time Web Dashboard
 
 • Backend implemented using Flask
+
 • Front-end built with HTML, CSS, and JavaScript
+
 • Displays reservoir levels, zone states, daily changes, and optimization results
+
 • Includes event console and dynamic color-coded real-time table
 
 Repository Structure
 
 AquaSmart-Integrated-Water-Rationing-System/
+
 • simulation/ — simulacion.py, prueba.py
+
 • optimization/ — corner.mod, corner_datos.dat
+
 • arduino/ — riego.ino, distribucion.ino
+
 • control/ — riego.py
+
 • web/ — server.py, index.html, static assets
+
 • data/ — parametros_simulados.txt, parametros_completo.txt, parametros_truncados.txt, data.json
 
 System Flow
 
 The complete execution pipeline of the system is represented in the flow diagram below:
 
+![System Flow Diagram](AquaSmart_CODE/images/diagrama_flujo.png)
+
 This diagram illustrates how AquaSmart operates internally:
 simulation → feasibility validation → MILP optimization → Arduino-based execution → real-time web monitoring.
 
 The physical and electronic architecture of the prototype, which uses an ultrasonic and temperature sensor, water pumps, and a joystick, is shown in the following circuit diagram:
 
-![System Flow Diagram](AquaSmart_CODE/images/diagrama_flujo.png)
 
 This circuit represents the actual hardware implementation used to execute the rationing calendar computed by the optimization model.
-AquaSmart_CODE/images/circuito.png
+![Circuit Diagram](AquaSmart_CODE/images/circuito.png)
+
 Requirements
 
 Python: Python 3.10+, Flask, PySerial, optional NumPy/Pandas
@@ -112,18 +131,22 @@ Case Study: Bogotá 2025 Water Crisis
 
 AquaSmart replicates real consumption patterns and reservoir behavior observed during Bogotá’s 2025 drought. Results show:
 
-AquaSmart_CODE/images/results.png
+![Results](AquaSmart_CODE/images/results.png)
 
 • A 25–30% reduction in total water consumption compared to no-rationing scenarios
+
 • Progressive recovery of reservoir levels
+
 • Enforcement of fairness constraints (no zone experiences more than two consecutive rationing days)
+
 • High agreement between theoretical predictions and physical prototype measurements
+
 • Full synchronization between simulation, optimization, Arduino execution and digital visualization
 
 Author
 
 David Santiago Hernández Hernández
-School of Engineering, Science and Technology
+School of Science and Engineering
 Universidad del Rosario — Bogotá, Colombia
 
 
