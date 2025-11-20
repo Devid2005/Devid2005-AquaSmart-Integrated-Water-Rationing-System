@@ -146,7 +146,9 @@ AquaSmart replicates real consumption patterns and reservoir behavior observed d
 Author
 
 David Santiago Hernández Hernández
+
 School of Science and Engineering
+
 Universidad del Rosario — Bogotá, Colombia
 
 
